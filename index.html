@@ -1,248 +1,160 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Quiz Singularidades - Verdadeiro ou Falso</title>
+  <title>Quiz Singularidades</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f9f9f9;
-      color: #333;
-      padding: 30px;
+      font-family: Arial, sans-serif;
       text-align: center;
-    }
-    h1 {
-      margin-bottom: 20px;
-      color: #2c3e50;
+      margin-top: 40px;
     }
     #pergunta {
-      font-size: 26px;
-      margin: 30px 0 20px;
-      padding: 15px;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 24px;
+      margin: 20px;
     }
-    .botao-resposta {
-      font-size: 20px;
+    .botao {
+      padding: 10px 20px;
+      font-size: 18px;
       margin: 10px;
-      padding: 12px 24px;
       cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      background-color: #3498db;
-      color: white;
-      transition: background 0.3s;
     }
-    .botao-resposta:hover {
-      background-color: #2980b9;
+    #resultado {
+      font-size: 30px;
+      margin-top: 30px;
+      color: green;
     }
-    #resultado, #placar, #timer, #mensagem {
-      margin-top: 20px;
+    #cronometro {
       font-size: 20px;
+      margin-top: 10px;
+      color: red;
     }
-    #start {
-      padding: 12px 28px;
-      font-size: 22px;
-      background-color: #2ecc71;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
+    #asteriscos {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      font-size: 30px;
+      color: gold;
+      display: none;
     }
-    #start:hover {
-      background-color: #27ae60;
+    .asterisco {
+      position: absolute;
+      animation: cair 2s linear infinite;
+    }
+    @keyframes cair {
+      from { transform: translateY(-100px); opacity: 1; }
+      to { transform: translateY(100vh); opacity: 0; }
     }
   </style>
 </head>
 <body>
-  <h1>Quiz Singularidades: Verdadeiro ou Falso</h1>
-  <button id="start">Iniciar Jogo</button>
-  <div id="placar">A: 0 | B: 0</div>
-  <div id="pergunta"></div>
-  <div id="mensagem">Para poder responder, o jogador precisa pressionar primeiro: A ou L</div>
-  <div id="timer"></div>
-  <div id="resposta-buttons" style="display:none;">
-    <button class="botao-resposta" data-resp="V">Verdadeiro</button>
-    <button class="botao-resposta" data-resp="F">Falso</button>
-  </div>
+  <h1>Quiz Singularidades</h1>
+  <button class="botao" onclick="iniciarJogo()" id="botaoComecar">Começar a jogada</button>
+  <div id="pergunta" style="display:none;"></div>
+  <div id="cronometro"></div>
+  <button class="botao" onclick="responder('V')" style="display:none;" id="botaoV">V</button>
+  <button class="botao" onclick="responder('F')" style="display:none;" id="botaoF">F</button>
   <div id="resultado"></div>
-
+  <button id="recomecar" class="botao" onclick="iniciarJogo()" style="display:none;">Começar outra vez</button>
+  <div id="asteriscos"></div>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const perguntas = [
-        { pergunta: "Segundo Piaget, o desenvolvimento cognitivo ocorre por estágios sequenciais.", resposta: "V" },
-        { pergunta: "De acordo com Vygotsky, a interação social é fundamental para o processo de aprendizagem.", resposta: "V" },
-        { pergunta: "A BNCC valoriza a participação ativa do aluno na construção do conhecimento.", resposta: "V" },
-        { pergunta: "A diversidade deve ser respeitada e valorizada no espaço escolar.", resposta: "V" },
-        { pergunta: "O ensino híbrido combina estratégias presenciais e digitais.", resposta: "V" },
-        { pergunta: "A avaliação somativa é a única forma válida de avaliação segundo a BNCC.", resposta: "F" },
-        { pergunta: "A mediação do professor é fundamental na teoria de Vygotsky.", resposta: "V" },
-        { pergunta: "O currículo oculto é aquele que está presente apenas nos documentos oficiais.", resposta: "F" },
-        { pergunta: "A ludicidade é elemento essencial na Educação Infantil.", resposta: "V" },
-        { pergunta: "O ensino tradicional é o único válido para garantir a aprendizagem.", resposta: "F" },
-        { pergunta: "A escuta ativa é uma prática pedagógica importante na Educação Infantil.", resposta: "V" },
-        { pergunta: "A leitura de mundo é um conceito importante em Paulo Freire.", resposta: "V" },
-        { pergunta: "A avaliação deve ser punitiva e classificatória.", resposta: "F" },
-        { pergunta: "A aprendizagem baseada em problemas promove o pensamento crítico.", resposta: "V" },
-        { pergunta: "A personalização do ensino busca atender às singularidades dos alunos.", resposta: "V" },
-        { pergunta: "O erro deve ser visto como uma oportunidade de aprendizagem.", resposta: "V" },
-        { pergunta: "A escuta sensível é uma prática desnecessária no cotidiano escolar.", resposta: "F" },
-        { pergunta: "A gestão democrática é um princípio da LDB.", resposta: "V" },
-        { pergunta: "A escola deve ignorar o contexto sociocultural dos alunos.", resposta: "F" },
-        { pergunta: "A educação deve promover o pensamento crítico e reflexivo.", resposta: "V" },
-        { pergunta: "A avaliação diagnóstica serve para identificar os conhecimentos prévios dos alunos.", resposta: "V" },
-        { pergunta: "O ensino por competências está ultrapassado.", resposta: "F" },
-        { pergunta: "O uso de projetos pode favorecer o desenvolvimento de competências.", resposta: "V" },
-        { pergunta: "As TICs são ferramentas sem relevância no processo pedagógico.", resposta: "F" },
-        { pergunta: "A inclusão escolar propõe a separação de alunos com deficiência para melhor aproveitamento.", resposta: "F" },
-        { pergunta: "A BNCC valoriza a organização do conhecimento em projetos interdisciplinares.", resposta: "V" },
-        { pergunta: "A aprendizagem significativa ocorre quando o aluno relaciona novos conteúdos aos que já conhece.", resposta: "V" },
-        { pergunta: "A formação docente é um processo contínuo e reflexivo.", resposta: "V" },
-        { pergunta: "O currículo deve respeitar a diversidade cultural dos alunos.", resposta: "V" },
-        { pergunta: "A interdisciplinaridade compromete a clareza dos conteúdos escolares.", resposta: "F" },
-        { pergunta: "A escuta das crianças não é relevante no planejamento pedagógico.", resposta: "F" },
-        { pergunta: "A educação deve formar cidadãos críticos e atuantes.", resposta: "V" },
-        { pergunta: "A avaliação formativa permite ajustes no percurso de aprendizagem.", resposta: "V" },
-        { pergunta: "A alfabetização deve considerar os diversos saberes dos alunos.", resposta: "V" },
-        { pergunta: "A escola deve atuar de forma colaborativa com a comunidade.", resposta: "V" },
-        { pergunta: "O protagonismo juvenil é incentivado na BNCC.", resposta: "V" },
-        { pergunta: "A participação do aluno nas decisões escolares é desnecessária.", resposta: "F" },
-        { pergunta: "A escuta pedagógica não contribui para o planejamento docente.", resposta: "F" },
-        { pergunta: "A aprendizagem é favorecida quando o aluno está motivado.", resposta: "V" },
-        { pergunta: "A escola deve garantir equidade no acesso ao conhecimento.", resposta: "V" },
-        { pergunta: "A avaliação deve acontecer apenas ao final do processo de ensino.", resposta: "F" },
-        { pergunta: "As práticas pedagógicas devem ser planejadas com intencionalidade.", resposta: "V" },
-        { pergunta: "A empatia é uma habilidade socioemocional relevante no ambiente escolar.", resposta: "V" },
-        { pergunta: "O respeito às diferenças é princípio fundamental da educação.", resposta: "V" },
-        { pergunta: "A diversidade deve ser respeitada e valorizada no espaço escolar.", resposta: "V" }
-      ];
+    const perguntasOriginais = [{'pergunta': 'Segundo Piaget, o desenvolvimento cognitivo ocorre por estágios sequenciais.', 'resposta': 'V'}, {'pergunta': 'De acordo com Vygotsky, a interação social é fundamental para o processo de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A BNCC valoriza a participação ativa do aluno na construção do conhecimento.', 'resposta': 'V'}, {'pergunta': 'A diversidade deve ser respeitada e valorizada no espaço escolar.', 'resposta': 'V'}, {'pergunta': 'O ensino híbrido combina estratégias presenciais e digitais.', 'resposta': 'V'}, {'pergunta': 'A avaliação somativa é a única forma válida de avaliação segundo a BNCC.', 'resposta': 'F'}, {'pergunta': 'A mediação do professor é fundamental na teoria de Vygotsky.', 'resposta': 'V'}, {'pergunta': 'O currículo oculto é aquele que está presente apenas nos documentos oficiais.', 'resposta': 'F'}, {'pergunta': 'A ludicidade é elemento essencial na Educação Infantil.', 'resposta': 'V'}, {'pergunta': 'O ensino tradicional é o único válido para garantir a aprendizagem.', 'resposta': 'F'}, {'pergunta': 'A escuta ativa é uma prática pedagógica importante na Educação Infantil.', 'resposta': 'V'}, {'pergunta': 'A leitura de mundo é um conceito importante em Paulo Freire.', 'resposta': 'V'}, {'pergunta': 'A avaliação deve ser punitiva e classificatória.', 'resposta': 'F'}, {'pergunta': 'A aprendizagem baseada em problemas promove o pensamento crítico.', 'resposta': 'V'}, {'pergunta': 'A personalização do ensino busca atender às singularidades dos alunos.', 'resposta': 'V'}, {'pergunta': 'O erro deve ser visto como uma oportunidade de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A escuta sensível é uma prática desnecessária no cotidiano escolar.', 'resposta': 'F'}, {'pergunta': 'A gestão democrática é um princípio da LDB.', 'resposta': 'V'}, {'pergunta': 'A escola deve ignorar o contexto sociocultural dos alunos.', 'resposta': 'F'}, {'pergunta': 'A educação deve promover o pensamento crítico e reflexivo.', 'resposta': 'V'}, {'pergunta': 'A avaliação diagnóstica serve para identificar os conhecimentos prévios dos alunos.', 'resposta': 'V'}, {'pergunta': 'O ensino por competências está ultrapassado.', 'resposta': 'F'}, {'pergunta': 'O uso de projetos pode favorecer o desenvolvimento de competências.', 'resposta': 'V'}, {'pergunta': 'As TICs são ferramentas sem relevância no processo pedagógico.', 'resposta': 'F'}, {'pergunta': 'A inclusão escolar propõe a separação de alunos com deficiência para melhor aproveitamento.', 'resposta': 'F'}, {'pergunta': 'A BNCC valoriza a organização do conhecimento em projetos interdisciplinares.', 'resposta': 'V'}, {'pergunta': 'A aprendizagem significativa ocorre quando o aluno relaciona novos conteúdos aos que já conhece.', 'resposta': 'V'}, {'pergunta': 'A formação docente é um processo contínuo e reflexivo.', 'resposta': 'V'}, {'pergunta': 'O currículo deve respeitar a diversidade cultural dos alunos.', 'resposta': 'V'}, {'pergunta': 'A interdisciplinaridade compromete a clareza dos conteúdos escolares.', 'resposta': 'F'}, {'pergunta': 'A escuta das crianças não é relevante no planejamento pedagógico.', 'resposta': 'F'}, {'pergunta': 'A educação deve formar cidadãos críticos e atuantes.', 'resposta': 'V'}, {'pergunta': 'A avaliação formativa permite ajustes no percurso de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A alfabetização deve considerar os diversos saberes dos alunos.', 'resposta': 'V'}, {'pergunta': 'A escola deve atuar de forma colaborativa com a comunidade.', 'resposta': 'V'}, {'pergunta': 'O protagonismo juvenil é incentivado na BNCC.', 'resposta': 'V'}, {'pergunta': 'A participação do aluno nas decisões escolares é desnecessária.', 'resposta': 'F'}, {'pergunta': 'A escuta pedagógica não contribui para o planejamento docente.', 'resposta': 'F'}, {'pergunta': 'A aprendizagem é favorecida quando o aluno está motivado.', 'resposta': 'V'}, {'pergunta': 'A escola deve garantir equidade no acesso ao conhecimento.', 'resposta': 'V'}, {'pergunta': 'A avaliação deve acontecer apenas ao final do processo de ensino.', 'resposta': 'F'}, {'pergunta': 'As práticas pedagógicas devem ser planejadas com intencionalidade.', 'resposta': 'V'}, {'pergunta': 'A empatia é uma habilidade socioemocional relevante no ambiente escolar.', 'resposta': 'V'}, {'pergunta': 'O respeito às diferenças é princípio fundamental da educação.', 'resposta': 'V'}, {'pergunta': 'A diversidade deve ser respeitada e valorizada no espaço escolar.', 'resposta': 'V'}];
 
-      let jogadorAtual = null;
-      let placar = { A: 0, B: 0 };
-      let perguntaAtual = null;
-      let perguntasRodada = [];
-      let tempoLimite = 20;
-      let cronometro;
-      let perguntasFeitas = 0;
-      const TOTAL_PERGUNTAS_POR_JOGO = 5;
+    let perguntas = [];
+    let indice = 0;
+    let erros = 0;
+    let acertos = 0;
+    let tempoRestante = 10;
+    let cronometroInterval;
 
-      const startBtn = document.getElementById("start");
-      const perguntaEl = document.getElementById("pergunta");
-      const timerEl = document.getElementById("timer");
-      const resultadoEl = document.getElementById("resultado");
-      const placarEl = document.getElementById("placar");
-      const respostaBtns = document.getElementById("resposta-buttons");
-      const mensagemEl = document.getElementById("mensagem");
+    function embaralhar(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
-      startBtn.addEventListener("click", iniciarJogo);
+    function iniciarJogo() {
+      perguntas = embaralhar([...perguntasOriginais]).slice(0, 5);
+      indice = 0;
+      erros = 0;
+      acertos = 0;
+      document.getElementById('resultado').innerText = '';
+      document.getElementById('recomecar').style.display = 'none';
+      document.getElementById('asteriscos').innerHTML = '';
+      document.getElementById('asteriscos').style.display = 'none';
+      document.getElementById('botaoComecar').style.display = 'none';
+      document.getElementById('pergunta').style.display = 'block';
+      document.getElementById('botaoV').style.display = 'inline-block';
+      document.getElementById('botaoF').style.display = 'inline-block';
+      mostrarPergunta();
+    }
 
-      function iniciarJogo() {
-        startBtn.style.display = "none";
-        placar = { A: 0, B: 0 };
-        perguntasRodada = embaralhar([...perguntas]).slice(0, TOTAL_PERGUNTAS_POR_JOGO);
-        perguntasFeitas = 0;
-        novaPergunta();
-      }
+    function mostrarPergunta() {
+      if (cronometroInterval) clearInterval(cronometroInterval);
 
-      function embaralhar(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
+      if (indice < perguntas.length) {
+        document.getElementById('pergunta').innerText = perguntas[indice].pergunta;
+        tempoRestante = 10;
+        document.getElementById('cronometro').innerText = `Tempo restante: ${tempoRestante}s`;
 
-      function novaPergunta() {
-        if (perguntasFeitas >= perguntasRodada.length) {
-          mostrarVencedorFinal();
-          return;
-        }
-
-        perguntaAtual = perguntasRodada[perguntasFeitas];
-        if (!perguntaAtual) return;
-
-        respostaBtns.style.display = "none";
-        resultadoEl.textContent = "";
-        timerEl.textContent = "";
-        mensagemEl.textContent = "Pressione A ou L para responder";
-        jogadorAtual = null;
-        clearInterval(cronometro);
-
-        perguntaEl.textContent = perguntaAtual.pergunta;
-        iniciarContagemRegressiva();
-      }
-
-      function iniciarContagemRegressiva() {
-        let tempoRestante = tempoLimite;
-        timerEl.textContent = `Tempo: ${tempoRestante}s`;
-        cronometro = setInterval(() => {
+        cronometroInterval = setInterval(() => {
           tempoRestante--;
-          timerEl.textContent = `Tempo: ${tempoRestante}s`;
-          if (tempoRestante <= 0) {
-            clearInterval(cronometro);
-            resultadoEl.textContent = "Tempo esgotado. Ninguém respondeu.";
-            perguntasFeitas++;
-            setTimeout(novaPergunta, 1000);
+          document.getElementById('cronometro').innerText = `Tempo restante: ${tempoRestante}s`;
+
+          if (tempoRestante === 0) {
+            clearInterval(cronometroInterval);
+            erros++;
+            indice++;
+            mostrarPergunta();
           }
         }, 1000);
-      }
+      } else {
+        document.getElementById('pergunta').style.display = 'none';
+        document.getElementById('botaoV').style.display = 'none';
+        document.getElementById('botaoF').style.display = 'none';
+        document.getElementById('cronometro').innerText = '';
 
-      document.addEventListener("keydown", (event) => {
-        if (!jogadorAtual && (event.key.toLowerCase() === "a" || event.key.toLowerCase() === "l")) {
-          jogadorAtual = event.key.toLowerCase() === "a" ? "A" : "B";
-          respostaBtns.style.display = "block";
-          mensagemEl.innerHTML = `<div style='font-size:26px; color:#8e44ad; font-weight:bold;'>JOGADOR ${jogadorAtual} RESPONDE!</div>`;
-          clearInterval(cronometro);
-        }
-      });
-
-      respostaBtns.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => verificarResposta(btn.dataset.resp));
-      });
-
-      function verificarResposta(resp) {
-        if (!perguntaAtual) return;
-
-        const correta = resp === perguntaAtual.resposta;
-        const msg = correta ? `Jogador ${jogadorAtual} acertou!` : `Jogador ${jogadorAtual} errou.`;
-        if (correta) placar[jogadorAtual]++;
-
-        resultadoEl.textContent = msg;
-        placarEl.textContent = `A: ${placar.A} | B: ${placar.B}`;
-
-        if (placar[jogadorAtual] === 5) {
-          alert(`Jogador ${jogadorAtual} venceu!`);
-          startBtn.style.display = "inline-block";
-          perguntaEl.textContent = "";
-          respostaBtns.style.display = "none";
-          return;
-        }
-
-        perguntasFeitas++;
-
-        if (perguntasFeitas >= TOTAL_PERGUNTAS_POR_JOGO) {
-          mostrarVencedorFinal();
+        if (erros === 0) {
+          document.getElementById('resultado').innerText = "🎉 Parabéns! Você acertou todas!";
+          chuvaDeAsteriscos();
         } else {
-          setTimeout(novaPergunta, 1000);
+          document.getElementById('resultado').innerText = "Que pena! Você errou " + erros + " pergunta(s).";
         }
+        document.getElementById('recomecar').style.display = 'inline-block';
+      }
+    }
+
+    function responder(resposta) {
+      if (indice >= perguntas.length) return;
+
+      clearInterval(cronometroInterval);
+
+      if (resposta === perguntas[indice].resposta) {
+        acertos++;
+      } else {
+        erros++;
       }
 
-      function mostrarVencedorFinal() {
-        let vencedor;
-        if (placar.A > placar.B) vencedor = "A";
-        else if (placar.B > placar.A) vencedor = "B";
-        else vencedor = null;
+      indice++;
+      mostrarPergunta();
+    }
 
-        const mensagemFinal = vencedor ? `Fim do jogo! Jogador ${vencedor} venceu com mais acertos.` : "Fim do jogo! Empate.";
-        setTimeout(() => {
-          resultadoEl.innerHTML = `<div style='font-size:28px; font-weight:bold; margin-top:30px; color:#e74c3c;'>${mensagemFinal}</div>`;
-          startBtn.style.display = "inline-block";
-          perguntaEl.textContent = "";
-          respostaBtns.style.display = "none";
-        }, 100);
+    function chuvaDeAsteriscos() {
+      const container = document.getElementById('asteriscos');
+      container.style.display = 'block';
+      for (let i = 0; i < 100; i++) {
+        const estrela = document.createElement('div');
+        estrela.classList.add('asterisco');
+        estrela.innerText = '*';
+        estrela.style.left = Math.random() * 100 + 'vw';
+        estrela.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        estrela.style.fontSize = (Math.random() * 30 + 20) + 'px';
+        container.appendChild(estrela);
       }
-    });
+    }
   </script>
 </body>
 </html>
