@@ -6,38 +6,69 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 40px;
       background-color: #85225B;
       color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #quiz-container {
+      background-color: #ffffff22;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+    }
+
     #pergunta {
       font-size: 24px;
-      margin: 20px;
+      margin: 20px 0;
+      padding: 20px;
+      background-color: white;
+      color: #85225B;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
+
     .botao {
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 18px;
-      margin: 10px;
+      margin: 10px 5px;
       cursor: pointer;
       background-color: white;
       color: #85225B;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      transition: background-color 0.3s;
     }
+
     .botao:hover {
       background-color: #f0f0f0;
     }
+
     #resultado {
-      font-size: 30px;
-      margin-top: 30px;
+      font-size: 24px;
+      margin-top: 20px;
       color: lightgreen;
     }
+
     #cronometro {
-      font-size: 20px;
+      font-size: 18px;
       margin-top: 10px;
       color: yellow;
     }
+
     #asteriscos {
       position: fixed;
       top: 0;
@@ -50,10 +81,12 @@
       color: gold;
       display: none;
     }
+
     .asterisco {
       position: absolute;
       animation: cair 2s linear infinite;
     }
+
     @keyframes cair {
       from { transform: translateY(-100px); opacity: 1; }
       to { transform: translateY(100vh); opacity: 0; }
@@ -61,19 +94,23 @@
   </style>
 </head>
 <body>
-  <h1>Quiz Singularidades</h1>
-  <button class="botao" onclick="iniciarJogo()" id="botaoComecar">Começar a jogada</button>
-  <div id="pergunta" style="display:none;"></div>
-  <div id="cronometro"></div>
-  <button class="botao" onclick="responder('V')" style="display:none;" id="botaoV">V</button>
-  <button class="botao" onclick="responder('F')" style="display:none;" id="botaoF">F</button>
-  <div id="resultado"></div>
-  <button id="recomecar" class="botao" onclick="iniciarJogo()" style="display:none;">Começar outra vez</button>
+  <div id="quiz-container">
+    <h1>Quiz Singularidades</h1>
+    <button class="botao" onclick="iniciarJogo()" id="botaoComecar">Começar a jogada</button>
+    <div id="pergunta" style="display:none;"></div>
+    <div id="cronometro"></div>
+    <button class="botao" onclick="responder('V')" style="display:none;" id="botaoV">V</button>
+    <button class="botao" onclick="responder('F')" style="display:none;" id="botaoF">F</button>
+    <div id="resultado"></div>
+    <button id="recomecar" class="botao" onclick="iniciarJogo()" style="display:none;">Começar outra vez</button>
+  </div>
+
   <div id="asteriscos"></div>
+
   <script>
     const perguntasOriginais = [{'pergunta': 'Segundo Piaget, o desenvolvimento cognitivo ocorre por estágios sequenciais.', 'resposta': 'V'}, {'pergunta': 'De acordo com Vygotsky, a interação social é fundamental para o processo de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A BNCC valoriza a participação ativa do aluno na construção do conhecimento.', 'resposta': 'V'}, {'pergunta': 'A diversidade deve ser respeitada e valorizada no espaço escolar.', 'resposta': 'V'}, {'pergunta': 'O ensino híbrido combina estratégias presenciais e digitais.', 'resposta': 'V'}, {'pergunta': 'A avaliação somativa é a única forma válida de avaliação segundo a BNCC.', 'resposta': 'F'}, {'pergunta': 'A mediação do professor é fundamental na teoria de Vygotsky.', 'resposta': 'V'}, {'pergunta': 'O currículo oculto é aquele que está presente apenas nos documentos oficiais.', 'resposta': 'F'}, {'pergunta': 'A ludicidade é elemento essencial na Educação Infantil.', 'resposta': 'V'}, {'pergunta': 'O ensino tradicional é o único válido para garantir a aprendizagem.', 'resposta': 'F'}, {'pergunta': 'A escuta ativa é uma prática pedagógica importante na Educação Infantil.', 'resposta': 'V'}, {'pergunta': 'A leitura de mundo é um conceito importante em Paulo Freire.', 'resposta': 'V'}, {'pergunta': 'A avaliação na perspectiva interacionista deve ser punitiva e classificatória.', 'resposta': 'F'}, {'pergunta': 'A aprendizagem baseada em problemas promove o pensamento crítico.', 'resposta': 'V'}, {'pergunta': 'A personalização do ensino busca atender às singularidades dos alunos.', 'resposta': 'V'}, {'pergunta': 'O erro deve ser visto como uma oportunidade de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A escuta sensível é uma prática desnecessária no cotidiano escolar.', 'resposta': 'F'}, {'pergunta': 'A gestão democrática é um princípio da LDB.', 'resposta': 'V'}, {'pergunta': 'A escola deve ignorar o contexto sociocultural dos alunos.', 'resposta': 'F'}, {'pergunta': 'A educação deve promover o pensamento crítico e reflexivo.', 'resposta': 'V'}, {'pergunta': 'A avaliação diagnóstica serve para identificar os conhecimentos prévios dos alunos.', 'resposta': 'V'}, {'pergunta': 'O ensino por competências está ultrapassado.', 'resposta': 'F'}, {'pergunta': 'O uso de projetos pode favorecer o desenvolvimento de competências.', 'resposta': 'V'}, {'pergunta': 'As TICs são ferramentas sem relevância no processo pedagógico.', 'resposta': 'F'}, {'pergunta': 'A inclusão escolar propõe a separação de alunos com deficiência para melhor aproveitamento pedagógico.', 'resposta': 'F'}, {'pergunta': 'A BNCC valoriza a organização do conhecimento em projetos interdisciplinares.', 'resposta': 'V'}, {'pergunta': 'A aprendizagem significativa ocorre quando o aluno relaciona novos conteúdos aos que já conhece.', 'resposta': 'V'}, {'pergunta': 'A formação docente é um processo contínuo e reflexivo.', 'resposta': 'V'}, {'pergunta': 'O currículo deve respeitar a diversidade cultural dos alunos.', 'resposta': 'V'}, {'pergunta': 'A interdisciplinaridade compromete a clareza dos conteúdos escolares.', 'resposta': 'F'}, {'pergunta': 'A escuta das crianças não é relevante no planejamento pedagógico.', 'resposta': 'F'}, {'pergunta': 'A educação deve formar cidadãos críticos e atuantes.', 'resposta': 'V'}, {'pergunta': 'A avaliação formativa permite ajustes no percurso de aprendizagem.', 'resposta': 'V'}, {'pergunta': 'A alfabetização deve considerar os diversos saberes dos alunos.', 'resposta': 'V'}, {'pergunta': 'A escola deve atuar de forma colaborativa com a comunidade.', 'resposta': 'V'}, {'pergunta': 'O protagonismo juvenil é incentivado na BNCC.', 'resposta': 'V'}, {'pergunta': 'A participação do aluno nas decisões escolares é desnecessária.', 'resposta': 'F'}, {'pergunta': 'A escuta pedagógica não contribui para o planejamento docente.', 'resposta': 'F'}, {'pergunta': 'A aprendizagem é favorecida quando o aluno está motivado.', 'resposta': 'V'}, {'pergunta': 'A escola deve garantir equidade no acesso ao conhecimento.', 'resposta': 'V'}, {'pergunta': 'A avaliação deve acontecer apenas ao final do processo de ensino.', 'resposta': 'F'}, {'pergunta': 'As práticas pedagógicas devem ser planejadas com intencionalidade.', 'resposta': 'V'}, {'pergunta': 'A empatia é uma habilidade socioemocional relevante no ambiente escolar.', 'resposta': 'V'}, {'pergunta': 'O respeito às diferenças é princípio fundamental da educação.', 'resposta': 'V'}, {'pergunta': 'A diversidade deve ser respeitada e valorizada no espaço escolar.', 'resposta': 'V'}];
 
-    let perguntas = [];
+   let perguntas = [];
     let indice = 0;
     let erros = 0;
     let acertos = 0;
@@ -106,11 +143,11 @@
       if (indice < perguntas.length) {
         document.getElementById('pergunta').innerText = perguntas[indice].pergunta;
         tempoRestante = 10;
-        document.getElementById('cronometro').innerText = `Tempo restante: ${tempoRestante}s`;
+        document.getElementById('cronometro').innerText = `⏱ Tempo restante: ${tempoRestante}s`;
 
         cronometroInterval = setInterval(() => {
           tempoRestante--;
-          document.getElementById('cronometro').innerText = `Tempo restante: ${tempoRestante}s`;
+          document.getElementById('cronometro').innerText = `⏱ Tempo restante: ${tempoRestante}s`;
 
           if (tempoRestante === 0) {
             clearInterval(cronometroInterval);
