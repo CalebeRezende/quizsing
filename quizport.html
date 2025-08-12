@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz de Português — Verdadeiro ou Falso (5/5 para vencer)</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171a2b; --muted:#a7b0c5; --text:#f4f6ff; --accent:#7bd389;
+    --danger:#ff6b6b; --ok:#69db7c;
+  }
+  body{
+    margin:0; font-family:system-ui,Segoe UI,Roboto,Ubuntu,Arial;
+    background: radial-gradient(1200px 700px at 70% -10%, #1b1f35 0%, #0f1220 60%), var(--bg);
+    color:var(--text); display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px;
+  }
+  .wrap{ width:min(900px,100%); background:#171a2bf0; border:1px solid #22253a; border-radius:18px; box-shadow: 0 12px 40px rgba(0,0,0,.35); overflow:hidden;}
+  header{padding:22px}
+  header h1{margin:0 0 6px}
+  header p{margin:0; color:var(--muted)}
+  .question-area{padding:22px; font-size:20px; min-height:110px; display:flex; align-items:center; justify-content:center; text-align:center;}
+  .controls{display:flex; gap:10px; justify-content:center; padding:0 22px 20px;}
+  .btn{flex:1; padding:14px; font-size:16px; border:none; border-radius:12px; cursor:pointer; font-weight:700;}
+  .true{background:var(--accent); color:#0b1d12}
+  .false{background:var(--danger)}
+  .start{background:#1a1f3a; color:#fff;}
+  .start:disabled{opacity:.6; cursor:not-allowed}
+  .statusbar{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:12px 22px; border-top:1px dashed #262a4a; color:var(--muted); gap:10px;}
+  .pill{ background:#12152a; border:1px solid #262a4a; padding:6px 10px; border-radius:999px; font-size:14px}
+  .score{color:var(--accent); font-weight:800}
+  .timer-wrap{ flex:1; min-width:160px; background:#22253a; border-radius:8px; overflow:hidden; height:16px; position:relative;}
+  .timer-bar{ height:100%; background:var(--accent); width:100%; transition:width 1s linear;}
+  .timer-text{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:#fff;}
+  .log{ display:none; padding:18px 22px 24px; border-top:1px solid #24294a; background:#0e1224; }
+  .log.show{ display:block}
+  table{ width:100%; border-collapse:collapse; border:1px solid #24294a; border-radius:12px; overflow:hidden;}
+  th, td{ padding:10px; text-align:center; }
+  thead{background:#141834;}
+  tbody tr:nth-child(odd){ background:#0f1430}
+  tbody tr:nth-child(even){ background:#11183a}
+  .ok{color:var(--ok); font-weight:700}
+  .no{color:var(--danger); font-weight:700}
+  #finalMsg{ margin-top:12px; font-size:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Quiz de Português — Verdadeiro ou Falso</h1>
+    <p>Responda <strong>5 perguntas</strong> em até <strong>30s</strong> cada. Precisa acertar <strong>5/5</strong> para vencer. Resposta em branco por tempo esgotado conta como erro.</p>
+  </header>
+
+  <div class="question-area" id="question">Clique em "Iniciar" para começar</div>
+
+  <div class="controls" id="answerButtons" style="display:none;">
+    <button class="btn true" id="btnV">Verdadeiro</button>
+    <button class="btn false" id="btnF">Falso</button>
+  </div>
+
+  <div class="controls">
+    <button class="btn start" id="startBtn">Iniciar</button>
+  </div>
+
+  <div class="statusbar">
+    <span class="pill">Pergunta: <strong id="qIdx">0</strong>/5</span>
+    <span class="pill">Pontos: <span class="score" id="score">0</span>/5</span>
+    <div class="timer-wrap">
+      <div class="timer-bar" id="timerBar"></div>
+      <div class="timer-text" id="timerText">—</div>
+    </div>
+  </div>
+
+  <section class="log" id="results">
+    <h3>Resultados</h3>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Pergunta</th><th>Resposta</th><th>Correta</th><th>Status</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="finalMsg"></div>
+  </section>
+</div>
+
+<script>
+/* ========= 100 PERGUNTAS (V/F) — ortografia, acentuação, hífen, grafia, parônimos ========= */
+const questions = [
+  {q:'A forma correta é "exceção".', a:'V'},
+  {q:'"Privilégio" está grafado corretamente.', a:'V'},
+  {q:'"Impecilho" é a grafia correta.', a:'F'},
+  {q:'"Empecilho" é a forma correta.', a:'V'},
+  {q:'"Travesseiro" tem acento.', a:'F'},
+  {q:'"Paralelepípedo" está grafado corretamente.', a:'V'},
+  {q:'"Derrepente" é a forma correta.', a:'F'},
+  {q:'"Com certeza" deve ser escrito separado.', a:'V'},
+  {q:'"A gente" escreve-se junto: "agente".', a:'F'},
+  {q:'"A gente" (pronome) é separado.', a:'V'},
+  {q:'"Houveram problemas" está correto no sentido de existir.', a:'F'},
+  {q:'"Houve problemas" é o correto no sentido de existir.', a:'V'},
+  {q:'"Menas" pessoas é aceitável na norma culta.', a:'F'},
+  {q:'"Sessão", "seção" e "cessão" têm sentidos diferentes.', a:'V'},
+  {q:'"Ao invés de" deve ser usado sempre que houver alternativa.', a:'F'},
+  {q:'"Em vez de" é a forma geral para alternativa; "ao invés de" indica oposição.', a:'V'},
+  {q:'"Ideia" não leva acento segundo o Acordo Ortográfico.', a:'V'},
+  {q:'"Heróico" é a forma recomendada pelo Acordo Ortográfico.', a:'F'},
+  {q:'"Heroico" (sem acento) está correto.', a:'V'},
+  {q:'"Vôo" é a forma atual.', a:'F'},
+  {q:'"Voo" é a forma atual.', a:'V'},
+  {q:'"Assembleia" não leva acento.', a:'V'},
+  {q:'"Assembléia" é a forma atual.', a:'F'},
+  {q:'"Lâmpada" está acentuada corretamente.', a:'V'},
+  {q:'"Pôde" (passado de poder) leva acento; "pode" (presente) não.', a:'V'},
+  {q:'"Juíz" leva acento.', a:'F'},
+  {q:'"Juiz" não leva acento.', a:'V'},
+  {q:'"País" leva acento no i.', a:'V'},
+  {q:'"Lápis" permanece com acento no singular e plural.', a:'V'},
+  {q:'"Ônibus" leva acento.', a:'V'},
+  {q:'"Açúcar" leva acento.', a:'V'},
+  {q:'"Recorde" tem pronúncia /récorde/ obrigatória e acento gráfico.', a:'F'},
+  {q:'"Recorde" não leva acento gráfico.', a:'V'},
+  {q:'"Gratuito" pode ser pronunciado gra-tu-Í-to ou gra-TU-to.', a:'V'},
+  {q:'"Detetive" é a forma correta.', a:'V'},
+  {q:'"Cabeleireiro" é a forma correta.', a:'V'},
+  {q:'"Padrasto" (pai do cônjuge da mãe) é com "dr".', a:'V'},
+  {q:'"Previlegio" está correto.', a:'F'},
+  {q:'"Beneficente" (de caridade) é com "c".', a:'V'},
+  {q:'"Beneficiente" está correto.', a:'F'},
+  {q:'"Absorver" é a forma correta.', a:'V'},
+  {q:'"Concerteza" está correto.', a:'F'},
+  {q:'"Padrão" escreve-se com "ão", não "padrâo".', a:'V'},
+  {q:'"Salsicha" é com "ch".', a:'V'},
+  {q:'"Enxergar" é a forma correta; "enchergar" não existe.', a:'V'},
+  {q:'"Xícara" é com x.', a:'V'},
+  {q:'"Ruído" leva acento.', a:'V'},
+  {q:'"Suspeita" é com "e", não "suspeicha".', a:'V'},
+  {q:'"Bicicleta" está correto; "bicicreta" não.', a:'V'},
+  {q:'"Meio-dia" é com hífen.', a:'V'},
+  {q:'"Cor-de-rosa" leva hífen.', a:'V'},
+  {q:'"Autoescola" é sem hífen.', a:'V'},
+  {q:'"Antissocial" é sem hífen.', a:'V'},
+  {q:'"Minissaia" é sem hífen.', a:'V'},
+  {q:'"Bem-vindo" leva hífen.', a:'V'},
+  {q:'"Bem-humorado" leva hífen.', a:'V'},
+  {q:'"Anti-inflamatório" tem hífen (vogais iguais).', a:'V'},
+  {q:'"Coautor" é sem hífen.', a:'V'},
+  {q:'"Infraestrutura" é sem hífen.', a:'V'},
+  {q:'"Auto-estima" é a forma correta.', a:'F'},
+  {q:'"Autoestima" é a forma correta.', a:'V'},
+  {q:'"Micro-ondas" é com hífen.', a:'V'},
+  {q:'"Contraindicação" é sem hífen.', a:'V'},
+  {q:'"Contra-indicação" é a forma atual.', a:'F'},
+  {q:'"Pôr" (verbo) leva acento para diferenciar de "por" (preposição).', a:'V'},
+  {q:'"Pôr do sol" escreve-se sem acento em "pôr".', a:'F'},
+  {q:'"Haver" no sentido de existir fica no singular: "há fatos".', a:'V'},
+  {q:'"Fazem dois anos" é obrigatório no singular.', a:'F'},
+  {q:'"Faz dois anos" (verbo impessoal) é a forma preferível.', a:'V'},
+  {q:'"Mandado" é ordem judicial; "mandato" é o cargo político.', a:'V'},
+  {q:'"Tráfego" (trânsito) e "tráfico" (comércio ilegal) têm sentidos distintos.', a:'V'},
+  {q:'"Resma" de papel (500 folhas) está correto.', a:'V'},
+  {q:'"Próprio" leva acento.', a:'V'},
+  {q:'"Hierarquia" é com "hie".', a:'V'},
+  {q:'"Quatorze" e "catorze" são ambas aceitas.', a:'V'},
+  {q:'"Mau" é o oposto de "bem".', a:'F'},
+  {q:'"Mau" é o oposto de "bom"; "mal" é o oposto de "bem".', a:'V'},
+  {q:'"Conserto" (reparo) e "concerto" (apresentação) têm sentidos distintos.', a:'V'},
+  {q:'"Sutiã" leva acento.', a:'V'},
+  {q:'"Pôster" pode aparecer sem acento por ser estrangeirismo.', a:'F'},
+  {q:'"Pôster" é aportuguesado com acento.', a:'V'},
+  {q:'"Azulejo" é a forma correta.', a:'V'},
+  {q:'"Bochecha" é com "ch".', a:'V'},
+  {q:'"Mecânico" leva acento.', a:'V'},
+  {q:'"Sútil" está correto.', a:'F'},
+  {q:'"Dócil" leva acento.', a:'V'},
+  {q:'"Alface" é com "c".', a:'V'},
+  {q:'"Mortadela" é a forma correta.', a:'V'},
+  {q:'"Mortandela" está correto.', a:'F'},
+  {q:'"Obrigatório" está acentuado corretamente.', a:'V'},
+  {q:'"Estátua" leva acento.', a:'V'},
+  {q:'"Abóbora" leva acento.', a:'V'},
+  {q:'"Cômodo" (substantivo) leva acento.', a:'V'},
+  {q:'"Comodo" é a forma correta para o substantivo.', a:'F'},
+  {q:'"Âmbito" leva acento.', a:'V'},
+  {q:'"Anfora" (vaso) dispensa acento.', a:'F'},
+  {q:'"Ânfora" é a forma correta.', a:'V'},
+  {q:'"Vírus" mantém acento no plural: vírus.', a:'V'},
+  {q:'"Três" e "vintém" mantêm acento.', a:'V'},
+  {q:'"Pêlo" (substantivo) mantém acento atualmente.', a:'F'},
+  {q:'"Pelo" (do corpo) não leva mais acento.', a:'V'},
+  {q:'"Crêem" (verbo crer, 3ª pl.) mantém acento.', a:'F'},
+  {q:'"Creem" (3ª pl.) não leva acento.', a:'V'},
+  {q:'"Lêem" (verbo ler, 3ª pl.) é a forma atual.', a:'F'},
+  {q:'"Leem" (3ª pl.) é a forma atual.', a:'V'},
+  {q:'"Vêem" (ver, 3ª pl.) é a forma atual.', a:'F'},
+  {q:'"Veem" (3ª pl.) é a forma atual.', a:'V'},
+  {q:'"Fortíssimo" está acentuado corretamente.', a:'V'},
+  {q:'"Intermidiário" está correto.', a:'F'},
+  {q:'"Intermediário" é a forma correta.', a:'V'},
+  {q:'"Pressa" é com ss; "preça" está errado.', a:'V'},
+  {q:'"Descente" (no sentido de correto) está certo.', a:'F'},
+  {q:'"Decente" (correto) e "descendente" (que desce) têm grafias distintas.', a:'V'},
+  {q:'"Emergir" (vir à tona) e "imergir" (mergulhar) têm sentidos opostos.', a:'V'},
+  {q:'"Ratificar" (confirmar) e "retificar" (corrigir) não são sinônimos.', a:'V'},
+  {q:'"Descriminar" e "discriminar" são sinônimos.', a:'F'},
+  {q:'"Descriminar" (tirar do crime) e "discriminar" (distinguir) têm sentidos diferentes.', a:'V'}
+];
+
+/* =================== LÓGICA DO JOGO =================== */
+const TIME_LIMIT = 30;
+
+let deck = [];          // 5 perguntas da rodada, sem repetição
+let score = 0;          // acertos
+let idx = 0;            // índice da pergunta atual (0..4)
+let remaining = TIME_LIMIT;
+let timerInterval = null;
+let history = [];       // {q, correct, user}
+
+const elQ      = document.getElementById('question');
+const elBtns   = document.getElementById('answerButtons');
+const btnV     = document.getElementById('btnV');
+const btnF     = document.getElementById('btnF');
+const btnStart = document.getElementById('startBtn');
+const elQIdx   = document.getElementById('qIdx');
+const elScore  = document.getElementById('score');
+const timerBar = document.getElementById('timerBar');
+const timerTxt = document.getElementById('timerText');
+const results  = document.getElementById('results');
+const tbody    = document.getElementById('tbody');
+const finalMsg = document.getElementById('finalMsg');
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function pickFiveUnique(){
+  const copy = [...questions];
+  shuffle(copy);
+  return copy.slice(0,5);
+}
+
+function resetTimerBar(){
+  timerBar.style.width = '100%';
+  timerBar.style.background = 'var(--accent)';
+  timerTxt.textContent = '—';
+}
+
+function updateTimerBar(){
+  const percent = (remaining/TIME_LIMIT)*100;
+  timerBar.style.width = percent + '%';
+  timerBar.style.background = remaining <= 5 ? 'var(--danger)' : 'var(--accent)';
+  timerTxt.textContent = remaining + 's';
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  remaining = TIME_LIMIT;
+  updateTimerBar();
+  timerInterval = setInterval(()=>{
+    remaining--;
+    updateTimerBar();
+    if(remaining <= 0){
+      clearInterval(timerInterval);
+      // tempo esgotado -> resposta vazia (erro)
+      registerAnswer('');
+      nextStep();
+    }
+  }, 1000);
+}
+
+function startGame(){
+  score = 0; idx = 0; history = [];
+  deck = pickFiveUnique();
+  elScore.textContent = '0';
+  elQIdx.textContent = '0';
+  results.classList.remove('show');
+  btnStart.disabled = true;
+  showQuestion();
+}
+
+function showQuestion(){
+  const item = deck[idx];
+  elQ.textContent = item.q;
+  elBtns.style.display = 'flex';
+  elQIdx.textContent = String(idx+1);
+  startTimer();
+}
+
+function registerAnswer(resp){
+  const current = deck[idx];
+  history.push({q: current.q, correct: current.a, user: resp});
+  if(resp === current.a){
+    score++;
+    elScore.textContent = String(score);
+  }
+}
+
+function nextStep(){
+  idx++;
+  if(idx >= 5){
+    return endGame();
+  }
+  showQuestion();
+}
+
+function endGame(){
+  clearInterval(timerInterval);
+  elBtns.style.display = 'none';
+  btnStart.disabled = false;
+  resetTimerBar();
+
+  // tabela
+  tbody.innerHTML = '';
+  history.forEach((h,i)=>{
+    const ok = h.user === h.correct;
+    const userShow = h.user ? h.user : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${h.q}</td><td>${userShow}</td><td>${h.correct}</td><td class="${ok?'ok':'no'}">${ok?'✔':'✖'}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  finalMsg.textContent = (score===5)
+    ? '🎉 Parabéns! Você acertou todas (5/5)!'
+    : `Você fez ${score}/5. Para vencer, precisa de 5/5. Tente novamente!`;
+
+  results.classList.add('show');
+}
+
+/* Eventos */
+btnStart.addEventListener('click', startGame);
+btnV.addEventListener('click', ()=>{
+  clearInterval(timerInterval);
+  registerAnswer('V');
+  nextStep();
+});
+btnF.addEventListener('click', ()=>{
+  clearInterval(timerInterval);
+  registerAnswer('F');
+  nextStep();
+});
+
+/* Estado inicial */
+resetTimerBar();
+</script>
+</body>
+</html>
