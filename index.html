@@ -7,72 +7,34 @@
 <style>
   :root{
     --bg:#0f1220; --card:#171a2b; --muted:#a7b0c5; --text:#f4f6ff; --accent:#7bd389;
-    --danger:#ff6b6b; --ok:#69db7c; --ring:#3a3f66;
+    --danger:#ff6b6b; --ok:#69db7c;
   }
   *{box-sizing:border-box}
   body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
     background: radial-gradient(1200px 700px at 70% -10%, #1b1f35 0%, #0f1220 60%), var(--bg);
     color:var(--text); display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px;
   }
-  .wrap{
-    width:min(920px,100%); background:color-mix(in srgb, var(--card) 88%, rgba(255,255,255,0));
-    border:1px solid #22253a; border-radius:18px; box-shadow: 0 12px 40px rgba(0,0,0,.35);
-    overflow:hidden;
-  }
+  .wrap{ width:min(920px,100%); background:#171a2bf0; border:1px solid #22253a; border-radius:18px; box-shadow: 0 12px 40px rgba(0,0,0,.35); overflow:hidden;}
   header{padding:22px 22px 0}
   header h1{margin:0 0 6px; font-size:clamp(20px,3vw,28px)}
   header p{margin:0 0 16px; color:var(--muted)}
-  .board{
-    display:grid; grid-template-columns: 1fr 1fr; gap:18px; padding:18px 22px 8px;
-  }
-  .wheel{
-    background:#111528; border:1px solid #24294a; border-radius:16px; padding:22px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px;
-    position:relative; overflow:hidden;
-  }
-  .wheel::after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background: radial-gradient(300px 120px at center, rgba(255,255,255,.08), transparent 60%);
-  }
+  .board{ display:grid; grid-template-columns: 1fr 1fr; gap:18px; padding:18px 22px 8px; }
+  .wheel{ background:#111528; border:1px solid #24294a; border-radius:16px; padding:22px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px; position:relative; overflow:hidden;}
   .wheel-label{font-size:14px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px}
-  .number{
-    font-weight:800; font-size:56px; letter-spacing:.02em;
-    text-shadow: 0 4px 18px rgba(0,0,0,.35);
-  }
-  .spin{
-    animation: spinFlick 1.2s ease-out;
-  }
-  @keyframes spinFlick{
-    0% { transform: translateY(0) scale(1); filter: blur(0px); opacity:.8;}
-    30%{ transform: translateY(6px) scale(1.02); filter: blur(1px); opacity:.9;}
-    100%{ transform: translateY(0) scale(1); filter: blur(0); opacity:1;}
-  }
-  .controls{
-    display:grid; grid-template-columns: 1.1fr 1fr auto; gap:12px; padding:8px 22px 22px;
-  }
-  .btn{
-    appearance:none; border:1px solid #2a2f54; background:#1a1f3a; color:var(--text);
-    padding:14px 16px; border-radius:12px; cursor:pointer; font-weight:700; letter-spacing:.02em;
-    transition: .15s ease-in-out; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25);
-  }
-  .btn:hover{transform: translateY(-1px); border-color:#3b4277}
+  .number{ font-weight:800; font-size:56px; letter-spacing:.02em; text-shadow: 0 4px 18px rgba(0,0,0,.35);}
+  .spin{ animation: spinFlick 1.2s ease-out; }
+  @keyframes spinFlick{ 0%{transform:translateY(0) scale(1);opacity:.8}30%{transform:translateY(6px) scale(1.02);opacity:.9}100%{transform:translateY(0) scale(1);opacity:1}}
+  .controls{ display:grid; grid-template-columns: 1.1fr 1fr auto; gap:12px; padding:8px 22px 10px; }
+  .btn{ appearance:none; border:1px solid #2a2f54; background:#1a1f3a; color:var(--text); padding:14px 16px; border-radius:12px; cursor:pointer; font-weight:700; letter-spacing:.02em; transition:.15s; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25);}
+  .btn:hover{ transform:translateY(-1px); border-color:#3b4277}
   .btn:disabled{opacity:.6; cursor:not-allowed; transform:none}
   .btn.primary{ background: linear-gradient(180deg, #2b9e6c, #1f7f57); border-color:#2b9e6c;}
-  .btn.primary:hover{ filter:brightness(1.05)}
-  .input{
-    background:#111528; border:1px solid #23284a; color:var(--text);
-    padding:14px; border-radius:12px; font-size:16px; outline:none; width:100%;
-  }
-  .statusbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:12px 22px; border-top:1px dashed #262a4a; color:var(--muted); gap:10px; flex-wrap:wrap;
-  }
+  .input{ background:#111528; border:1px solid #23284a; color:var(--text); padding:14px; border-radius:12px; font-size:16px; outline:none; width:100%;}
+  .statusbar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:12px 22px; border-top:1px dashed #262a4a; color:var(--muted); gap:10px;}
   .pill{ background:#12152a; border:1px solid #262a4a; padding:6px 10px; border-radius:999px; color:#cbd3ea; font-size:14px}
   .score{ color:var(--accent); font-weight:800}
-  .log{
-    display:none; padding:18px 22px 24px; border-top:1px solid #24294a; background:#0e1224;
-  }
+  .log{ display:none; padding:18px 22px 24px; border-top:1px solid #24294a; background:#0e1224; }
   .log.show{ display:block}
   table{ width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px; border:1px solid #24294a}
   th, td{ padding:12px 10px; text-align:center}
@@ -81,10 +43,12 @@
   tbody tr:nth-child(even){ background:#11183a}
   .ok{ color:var(--ok); font-weight:700}
   .no{ color:var(--danger); font-weight:700}
-  .final{
-    margin:14px 0 0; padding:12px 14px; background:#10162e; border:1px solid #242a52; border-radius:12px;
-  }
+  .final{ margin:14px 0 0; padding:12px 14px; background:#10162e; border:1px solid #242a52; border-radius:12px;}
   .celebrate{ font-size:22px; }
+  /* Barra de tempo */
+  .timer-wrap{ flex:1; min-width:120px; background:#22253a; border-radius:8px; overflow:hidden; height:16px; position:relative;}
+  .timer-bar{ height:100%; background:var(--accent); width:100%; transition:width 1s linear;}
+  .timer-text{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:#fff;}
   @media (max-width:760px){
     .board{ grid-template-columns: 1fr;}
     .controls{ grid-template-columns: 1fr 1fr; }
@@ -96,7 +60,7 @@
   <div class="wrap" id="app">
     <header>
       <h1>Roleta da Multiplicação</h1>
-      <p>Gire duas roletas (1–100), multiplique os números e responda. Você tem <strong>5 perguntas</strong> — precisa fazer <strong>5/5</strong> para vencer!</p>
+      <p>Gire duas roletas (1–100), multiplique os números e responda. Você tem <strong>5 perguntas</strong> — precisa fazer <strong>5/5</strong> para vencer! <br>⏳ Cada pergunta tem <strong>30 s</strong>.</p>
     </header>
 
     <section class="board">
@@ -120,6 +84,10 @@
     <div class="statusbar">
       <span class="pill">Pergunta: <strong id="qIdx">0</strong>/5</span>
       <span class="pill">Pontos: <span class="score" id="score">0</span>/5</span>
+      <div class="timer-wrap">
+        <div class="timer-bar" id="timerBar"></div>
+        <div class="timer-text" id="timerText">—</div>
+      </div>
       <span class="pill" id="statusText">Clique em <strong>Iniciar</strong> para começar</span>
     </div>
 
@@ -158,16 +126,20 @@
   const tbody = document.getElementById('tbody');
   const finalMsg = document.getElementById('finalMsg');
   const hint = document.getElementById('hint');
+  const timerBar = document.getElementById('timerBar');
+  const timerText = document.getElementById('timerText');
 
   let currentA = null, currentB = null;
   let question = 0;
   let score = 0;
   let playing = false;
-  const history = []; // {a,b,user,correct,ok}
+  const history = [];
 
-  function randInt(min, max){
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+  const TIME_LIMIT = 30;
+  let remaining = TIME_LIMIT;
+  let timerInterval = null;
+
+  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
   function spinOne(el, duration=1200, step=40){
     return new Promise(resolve=>{
@@ -193,6 +165,7 @@
     answerEl.disabled = true;
     answerEl.value = '';
     hint.textContent = '';
+    resetTimerBar();
 
     statusText.innerHTML = 'Girando roletas…';
     const [a,b] = await Promise.all([spinOne(numAEl), spinOne(numBEl)]);
@@ -202,6 +175,39 @@
     answerEl.disabled = false;
     answerEl.focus();
     submitBtn.disabled = false;
+
+    startTimer();
+  }
+
+  function startTimer(){
+    clearTimer();
+    remaining = TIME_LIMIT;
+    updateTimerBar();
+    timerInterval = setInterval(()=>{
+      remaining--;
+      updateTimerBar();
+      if(remaining <= 0){
+        clearTimer();
+        autoTimeoutAnswer();
+      }
+    }, 1000);
+  }
+
+  function resetTimerBar(){
+    timerBar.style.width = '100%';
+    timerBar.style.background = 'var(--accent)';
+    timerText.textContent = '—';
+  }
+
+  function updateTimerBar(){
+    const percent = (remaining/TIME_LIMIT)*100;
+    timerBar.style.width = percent + '%';
+    timerBar.style.background = remaining <= 5 ? 'var(--danger)' : 'var(--accent)';
+    timerText.textContent = remaining + 's';
+  }
+
+  function clearTimer(){
+    if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
   }
 
   function resetGame(){
@@ -214,7 +220,7 @@
     numAEl.textContent = '–';
     numBEl.textContent = '–';
     statusText.innerHTML = 'Clique em <strong>Iniciar</strong> para começar';
-    startBtn.textContent = 'Iniciar';
+    resetTimerBar();
     results.classList.remove('show');
     tbody.innerHTML = '';
     finalMsg.innerHTML = '';
@@ -222,11 +228,13 @@
     answerEl.disabled = true;
     submitBtn.disabled = true;
     startBtn.disabled = false;
+    startBtn.textContent = 'Iniciar';
     playing = false;
+    clearTimer();
   }
 
   function endGame(){
-    // monta tabela
+    clearTimer();
     tbody.innerHTML = '';
     history.forEach((h,i)=>{
       const tr = document.createElement('tr');
@@ -234,16 +242,15 @@
         <td>${i+1}</td>
         <td>${h.a}</td>
         <td>${h.b}</td>
-        <td>${h.user}</td>
+        <td>${h.user === '' ? '—' : h.user}</td>
         <td>${h.correct}</td>
         <td class="${h.ok ? 'ok':'no'}">${h.ok ? '✔ Acertou':'✖ Errou'}</td>
       `;
       tbody.appendChild(tr);
     });
     const perfect = score === 5;
-    const emoji = perfect ? '🎉✨' : '📊';
     finalMsg.innerHTML = `<div class="${perfect?'celebrate':''}">
-      ${emoji} Resultado final: <strong>${score}/5</strong> ${perfect ? '— Perfeito, 100% de aproveitamento!':'— Você precisa de 5/5 para vencer. Tente novamente!'}
+      ${perfect ? '🎉✨ Perfeito, 100% de aproveitamento!' : '📊 Você fez ' + score + '/5. Precisa de 5/5 para vencer.'}
     </div>`;
     results.classList.add('show');
     statusText.innerHTML = 'Jogo concluído.';
@@ -251,7 +258,7 @@
     startBtn.disabled = false;
     submitBtn.disabled = true;
     answerEl.disabled = true;
-    playing = false;
+    resetTimerBar();
   }
 
   async function nextRound(){
@@ -260,10 +267,9 @@
     await spinBoth();
   }
 
-  // Eventos
   startBtn.addEventListener('click', async ()=>{
-    if(playing === false){
-      resetGame(); // garante reset visível
+    if(!playing){
+      resetGame();
       playing = true;
       startBtn.textContent = 'Em andamento…';
       startBtn.disabled = true;
@@ -271,29 +277,23 @@
     }
   });
 
-  function handleSubmit(){
-    if(!playing) return;
-    const val = answerEl.value.trim();
-    if(val === ''){
-      hint.textContent = 'Digite uma resposta antes de enviar.';
-      return;
-    }
-    const user = Number(val);
+  function recordAnswer(userVal){
+    const user = userVal === '' ? '' : Number(userVal);
     const correct = currentA * currentB;
-    const ok = (user === correct);
-    history.push({a: currentA, b: currentB, user, correct, ok});
+    const ok = (userVal !== '' && user === correct);
+    history.push({a: currentA, b: currentB, user: userVal, correct, ok});
     if(ok){ score++; scoreEl.textContent = String(score); }
+  }
 
+  function proceedAfterAnswer(){
     question++;
     if(question >= 5){
-      // Finaliza — só agora mostramos quem acertou/errou
       submitBtn.disabled = true;
       answerEl.disabled = true;
       startBtn.disabled = true;
       statusText.innerHTML = 'Processando resultado…';
       setTimeout(endGame, 400);
     }else{
-      // Próxima rodada
       submitBtn.disabled = true;
       answerEl.disabled = true;
       startBtn.disabled = true;
@@ -302,12 +302,28 @@
     }
   }
 
-  submitBtn.addEventListener('click', handleSubmit);
-  answerEl.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter'){ handleSubmit(); }
-  });
+  function handleSubmit(){
+    if(!playing) return;
+    if(answerEl.disabled) return;
+    const val = answerEl.value.trim();
+    if(val === ''){
+      hint.textContent = 'Digite uma resposta antes de enviar.';
+      return;
+    }
+    clearTimer();
+    recordAnswer(val);
+    proceedAfterAnswer();
+  }
 
-  // Inicializa
+  function autoTimeoutAnswer(){
+    if(!playing) return;
+    recordAnswer('');
+    proceedAfterAnswer();
+  }
+
+  submitBtn.addEventListener('click', handleSubmit);
+  answerEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ handleSubmit(); }});
+
   resetGame();
 })();
 </script>
