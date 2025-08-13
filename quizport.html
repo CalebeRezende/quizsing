@@ -7,7 +7,7 @@
 <style>
   :root{
     --bg:#85225B;   /* fundo */
-    --card:#21355F; /* caixa */
+    --card:#EB6209; /* caixa */
     --muted:#fce6d8;
     --text:#fffaf7;
     --accent:#1AB1A1; /* botão verdadeiro e barra */
@@ -69,8 +69,9 @@
   thead{ background: rgba(0,0,0,.18); }
   tbody tr:nth-child(odd){ background: rgba(0,0,0,.08); }
   tbody tr:nth-child(even){ background: rgba(0,0,0,.14); }
-  .ok{ color:#083630; font-weight:900 }
-  .no{ color:#3b0006; font-weight:900 }
+  /* >>> Aqui: ACERTOU/ERROU em BRANCO <<< */
+  .ok{ color:#fff; font-weight:900 }
+  .no{ color:#fff; font-weight:900 }
   #finalMsg{ margin-top:12px; font-size:18px; }
 </style>
 </head>
@@ -345,10 +346,10 @@ function endGame(){
   tbody.innerHTML = '';
   history.forEach((h,i)=>{
     const ok = h.user === h.correct;
-    const userShow = (h.user === true) ? 'V' : (h.user === false) ? 'F' : '—';
-    const correctShow = h.correct ? 'V' : 'F';
+    const userShow = (h.user === true) ? 'Verdadeiro' : (h.user === false) ? 'Falso' : '—';
+    const correctShow = h.correct ? 'Verdadeiro' : 'Falso';
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${h.q}</td><td>${userShow}</td><td>${correctShow}</td><td class="${ok?'ok':'no'}">${ok?'✔ Acertou':'✖ Errou'}</td>`;
+    tr.innerHTML = `<td>${i+1}</td><td>${h.q}</td><td>${userShow}</td><td>${correctShow}</td><td class="${ok?'ok':'no'}">${ok?'Acertou':'Errou'}</td>`;
     tbody.appendChild(tr);
   });
 
