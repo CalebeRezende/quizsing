@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Singularidades</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #85225B;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #quiz-container {
+      background-color: #ffffff22;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    #pergunta {
+      font-size: 24px;
+      margin: 20px 0;
+      padding: 20px;
+      background-color: white;
+      color: #85225B;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .botao {
+      padding: 12px 24px;
+      font-size: 18px;
+      margin: 10px 5px;
+      cursor: pointer;
+      background-color: white;
+      color: #85225B;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .botao:hover {
+      background-color: #f0f0f0;
+    }
+
+    #resultado {
+      font-size: 24px;
+      margin-top: 20px;
+      color: lightgreen;
+    }
+
+    #cronometro {
+      font-size: 18px;
+      margin-top: 10px;
+      color: yellow;
+    }
+
+    #asteriscos {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      font-size: 30px;
+      color: gold;
+      display: none;
+    }
+
+    .asterisco {
+      position: absolute;
+      animation: cair 2s linear infinite;
+    }
+
+    @keyframes cair {
+      from { transform: translateY(-100px); opacity: 1; }
+      to { transform: translateY(100vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="quiz-container">
+    <h1>Quiz Singularidades</h1>
+    <button class="botao" onclick="iniciarJogo()" id="botaoComecar">Começar a jogada</button>
+    <div id="pergunta" style="display:none;"></div>
+    <div id="cronometro"></div>
+    <button class="botao" onclick="responder('V')" style="display:none;" id="botaoV">V</button>
+    <button class="botao" onclick="responder('F')" style="display:none;" id="botaoF">F</button>
+    <div id="resultado"></div>
+    <button id="recomecar" class="botao" onclick="iniciarJogo()" style="display:none;">Começar outra vez</button>
+  </div>
+
+  <div id="asteriscos"></div>
+
+  <script>
+    const perguntasOriginais = [
+    
+  { pergunta: 'Para Piaget, o processo de desenvolvimento cognitivo se dá de forma contínua e sem descontinuidades entre os estágios, sendo cada etapa passível de ser suprimida em prol da aprendizagem acelerada.', resposta: 'F' },
+  { pergunta: 'Na perspectiva vygotskyana, a aprendizagem antecede o desenvolvimento, sendo a interação social mediada pela linguagem um fator desencadeante do amadurecimento cognitivo.', resposta: 'V' },
+  { pergunta: 'A BNCC, ao adotar uma abordagem por competências, desvaloriza práticas centradas no protagonismo discente e na construção compartilhada do saber.', resposta: 'F' },
+  { pergunta: 'Considerando os princípios da equidade e inclusão, a valorização da diversidade no espaço escolar é uma diretriz periférica da BNCC, voltada apenas ao Ensino Médio.', resposta: 'F' },
+  { pergunta: 'O ensino híbrido, ao mesclar tecnologias digitais com interações presenciais, propõe uma ruptura com os modelos tradicionais sem comprometer os objetivos de aprendizagem.', resposta: 'V' },
+  { pergunta: 'A BNCC preconiza, de forma exclusiva, a avaliação somativa como instrumento eficaz para medir o desempenho final do estudante, em detrimento das demais formas de avaliação.', resposta: 'F' },
+  { pergunta: 'Na abordagem sociocultural de Vygotsky, a mediação do professor atua como elo entre o desenvolvimento potencial e o real do aprendiz, sendo um componente secundário na ZDP.', resposta: 'F' },
+  { pergunta: 'O currículo oculto refere-se a um conjunto de valores, normas e comportamentos implicitamente transmitidos no cotidiano escolar, não estando necessariamente documentado.', resposta: 'V' },
+  { pergunta: 'A ludicidade, enquanto estratégia pedagógica na Educação Infantil, articula-se ao desenvolvimento integral da criança e não deve ser confundida com simples recreação.', resposta: 'V' },
+  { pergunta: 'A pedagogia tradicional, apesar de criticada por correntes construtivistas, é reconhecida como uma abordagem eficaz e exclusiva para o sucesso educacional contemporâneo.', resposta: 'F' },
+  { pergunta: 'A escuta ativa, ao reconhecer a criança como sujeito de direitos, qualifica as interações pedagógicas e contribui para a intencionalidade do planejamento docente.', resposta: 'V' },
+  { pergunta: 'A noção freiriana de leitura de mundo antecede a leitura da palavra, sendo a decodificação textual considerada mais relevante que a compreensão crítica do contexto.', resposta: 'F' },
+  { pergunta: 'Na perspectiva interacionista, a avaliação assume um caráter formativo, devendo promover a exclusão de alunos com baixo desempenho como forma de nivelamento.', resposta: 'F' },
+  { pergunta: 'A aprendizagem baseada em problemas (PBL) tem por objetivo o desenvolvimento de competências cognitivas superiores, embora negligencie aspectos sociais da aprendizagem.', resposta: 'F' },
+  { pergunta: 'A personalização do ensino visa atender à singularidade dos sujeitos aprendentes, permitindo trajetórias flexíveis e respeitosas ao ritmo de cada um.', resposta: 'V' },
+  { pergunta: 'Do ponto de vista da avaliação formativa, o erro deve ser interpretado como sintoma de fracasso, devendo ser evitado por meio de instrução repetitiva.', resposta: 'F' },
+  { pergunta: 'A escuta sensível, enquanto prática pedagógica, constitui um recurso estratégico para alinhar o planejamento às necessidades e interesses reais das crianças.', resposta: 'V' },
+  { pergunta: 'A gestão democrática, como princípio da LDB, implica a participação dos diferentes segmentos da comunidade escolar na construção do projeto político-pedagógico.', resposta: 'V' },
+  { pergunta: 'A escola, em sua função social, pode desconsiderar o contexto sociocultural dos estudantes, desde que cumpra com os conteúdos previstos em lei.', resposta: 'F' },
+  { pergunta: 'Uma das finalidades da educação é o fomento ao pensamento crítico, à reflexão e à autonomia intelectual, conforme previsto na Constituição Federal e na LDB.', resposta: 'V' },
+  { pergunta: 'A avaliação diagnóstica permite a identificação dos conhecimentos prévios dos alunos, sendo essencial no planejamento das situações de aprendizagem.', resposta: 'V' },
+  { pergunta: 'A abordagem por competências, tal como proposta na BNCC, está desatualizada e não corresponde às demandas da sociedade contemporânea.', resposta: 'F' },
+  { pergunta: 'A metodologia de projetos pode articular conteúdos curriculares ao cotidiano dos alunos, favorecendo o desenvolvimento de competências e habilidades.', resposta: 'V' },
+  { pergunta: 'As Tecnologias da Informação e Comunicação (TICs), embora amplamente difundidas, não possuem função significativa no processo de ensino-aprendizagem.', resposta: 'F' },
+  { pergunta: 'A inclusão escolar propõe a retirada de alunos com deficiência do ensino comum, a fim de garantir-lhes um processo pedagógico mais eficaz.', resposta: 'F' },
+  { pergunta: 'A BNCC propõe a integração de saberes por meio de projetos interdisciplinares, como forma de superar a fragmentação curricular.', resposta: 'V' },
+  { pergunta: 'Segundo Ausubel, a aprendizagem significativa ocorre quando novos conteúdos se ancoram em conhecimentos prévios relevantes do aluno.', resposta: 'V' },
+  { pergunta: 'A formação docente, para além da formação inicial, exige processos contínuos de reflexão e atualização pedagógica.', resposta: 'V' },
+  { pergunta: 'A construção do currículo deve considerar a diversidade cultural e os múltiplos repertórios dos estudantes, evitando abordagens homogêneas.', resposta: 'V' },
+  { pergunta: 'A interdisciplinaridade, ao diluir os limites disciplinares, compromete a clareza conceitual necessária ao ensino de conteúdos escolares.', resposta: 'F' },
+  { pergunta: 'No planejamento pedagógico, a escuta das crianças constitui um recurso secundário, dispensável em contextos de alta performance escolar.', resposta: 'F' },
+  { pergunta: 'A formação cidadã exige uma educação comprometida com a criticidade, a ética e a transformação social.', resposta: 'V' },
+  { pergunta: 'A avaliação formativa permite intervenções no percurso de aprendizagem, sendo restrita às etapas finais do processo pedagógico.', resposta: 'F' },
+  { pergunta: 'A alfabetização, à luz da diversidade, deve considerar os múltiplos saberes e práticas sociais de leitura e escrita dos estudantes.', resposta: 'V' },
+  { pergunta: 'A atuação colaborativa entre escola e comunidade amplia os sentidos da educação e fortalece sua função social.', resposta: 'V' },
+  { pergunta: 'A BNCC reconhece o protagonismo juvenil como um princípio estruturante para o desenvolvimento de competências no Ensino Fundamental e Médio.', resposta: 'V' },
+  { pergunta: 'A participação discente nas decisões escolares representa um entrave à autoridade docente e, portanto, deve ser limitada.', resposta: 'F' },
+  { pergunta: 'A escuta pedagógica, embora relevante, não contribui para a elaboração de planejamentos contextualizados e responsivos.', resposta: 'F' },
+  { pergunta: 'A motivação intrínseca do estudante é um fator que potencializa a aprendizagem significativa e a autonomia no processo educativo.', resposta: 'V' },
+  { pergunta: 'A equidade no acesso ao conhecimento exige práticas pedagógicas diferenciadas e sensíveis às especificidades dos estudantes.', resposta: 'V' },
+  { pergunta: 'A avaliação, para ser efetiva, deve ocorrer exclusivamente ao final do processo educativo, com foco em resultados mensuráveis.', resposta: 'F' },
+  { pergunta: 'As práticas pedagógicas, para serem eficazes, devem ser intencionais, planejadas e alinhadas aos objetivos de aprendizagem.', resposta: 'V' },
+  { pergunta: 'A empatia, como competência socioemocional, é irrelevante no contexto de práticas escolares baseadas na racionalidade técnica.', resposta: 'F' },
+  { pergunta: 'O respeito às diferenças, às identidades e aos saberes plurais constitui fundamento indispensável para uma educação emancipadora.', resposta: 'V' },
+  { pergunta: 'O conceito de “zona de desenvolvimento proximal” implica que o aluno apenas aprende de forma autônoma, sem necessidade de mediação externa.', resposta: 'F' },
+  { pergunta: 'A pedagogia freiriana propõe uma prática bancária do ensino, na qual o educador deposita conteúdos prontos no educando.', resposta: 'F' },
+  { pergunta: 'A abordagem por projetos favorece a integração de saberes, embora possa apresentar desafios quanto à definição de objetivos de aprendizagem claros.', resposta: 'V' },
+  { pergunta: 'As competências gerais da BNCC orientam-se exclusivamente para o desenvolvimento de habilidades técnicas voltadas ao mercado de trabalho.', resposta: 'F' },
+  { pergunta: 'A avaliação formativa visa acompanhar o desenvolvimento do estudante, possibilitando a reorganização do ensino de forma contínua.', resposta: 'V' },
+  { pergunta: 'O ensino baseado em competências não considera os saberes prévios dos alunos, priorizando apenas o desempenho final.', resposta: 'F' },
+  { pergunta: 'A prática docente reflexiva pressupõe a análise crítica da própria ação educativa, implicando processos de autoavaliação constantes.', resposta: 'V' },
+  { pergunta: 'As metodologias ativas, ao transferirem o protagonismo para o estudante, tornam desnecessária a atuação docente.', resposta: 'F' },
+  { pergunta: 'A teoria histórico-cultural considera a cultura como elemento secundário no desenvolvimento humano.', resposta: 'F' },
+  { pergunta: 'A aprendizagem situada enfatiza a contextualização dos saberes, relacionando-os às práticas sociais e culturais do cotidiano.', resposta: 'V' },
+  { pergunta: 'A construção do conhecimento, segundo o construtivismo, ocorre pela simples repetição e memorização de conteúdos.', resposta: 'F' },
+  { pergunta: 'A transversalidade dos temas contemporâneos na BNCC visa promover a formação integral e cidadã dos estudantes.', resposta: 'V' },
+  { pergunta: 'A avaliação emancipatória tem como foco principal classificar e ranquear os estudantes.', resposta: 'F' },
+  { pergunta: 'A pedagogia da escuta considera as crianças como sujeitos ativos na construção do currículo.', resposta: 'V' },
+  { pergunta: 'A prática pedagógica intencional é aquela que se adapta exclusivamente aos resultados das avaliações externas.', resposta: 'F' },
+  { pergunta: 'O pensamento complexo, conforme Edgar Morin, defende a fragmentação do saber como caminho para a compreensão da realidade.', resposta: 'F' },
+  { pergunta: 'A escola democrática valoriza a participação de todos os sujeitos escolares nos processos decisórios.', resposta: 'V' },
+  { pergunta: 'A interdisciplinaridade busca superar a compartimentalização do saber, favorecendo uma visão holística dos fenômenos.', resposta: 'V' },
+  { pergunta: 'A concepção tecnicista de educação valoriza a autonomia docente e a construção coletiva do currículo.', resposta: 'F' },
+  { pergunta: 'O letramento, diferentemente da alfabetização, refere-se à inserção social da leitura e escrita nas práticas cotidianas.', resposta: 'V' },
+  { pergunta: 'As diretrizes da educação inclusiva propõem adaptações curriculares apenas para alunos com altas habilidades.', resposta: 'F' },
+  { pergunta: 'A docência exige não apenas domínio de conteúdos, mas também sensibilidade ética, estética e política.', resposta: 'V' },
+  { pergunta: 'As metodologias ativas podem incluir estratégias como sala de aula invertida, aprendizagem por pares e rotação por estações.', resposta: 'V' },
+  { pergunta: 'A autonomia intelectual do aluno deve ser evitada para não comprometer a autoridade do professor.', resposta: 'F' },
+  { pergunta: 'O planejamento participativo envolve professores, estudantes e comunidade na definição dos rumos pedagógicos da escola.', resposta: 'V' },
+  { pergunta: 'A gamificação no ensino tem por finalidade substituir integralmente os métodos pedagógicos tradicionais.', resposta: 'F' },
+  { pergunta: 'A cultura digital, ao ser incorporada à escola, amplia as possibilidades de aprendizagem e de expressão dos estudantes.', resposta: 'V' },
+  { pergunta: 'A BNCC propõe a integração entre as áreas do conhecimento para superar a fragmentação disciplinar.', resposta: 'V' },
+  { pergunta: 'A abordagem de Paulo Freire baseia-se na neutralidade política do processo educativo.', resposta: 'F' },
+  { pergunta: 'A afetividade, segundo Wallon, é um componente secundário no processo de aprendizagem e pode ser negligenciada.', resposta: 'F' },
+  { pergunta: 'As práticas colaborativas promovem a aprendizagem dialógica e a construção coletiva do conhecimento.', resposta: 'V' },
+  { pergunta: 'A avaliação tradicional, centrada em provas e notas, é a única capaz de medir a aprendizagem real do estudante.', resposta: 'F' },
+  { pergunta: 'O protagonismo docente implica capacidade de refletir criticamente sobre sua prática e transformá-la.', resposta: 'V' },
+  { pergunta: 'A Base Nacional Comum Curricular define currículos engessados e inflexíveis para todo o território nacional.', resposta: 'F' },
+  { pergunta: 'A mediação pedagógica requer escuta atenta, sensibilidade e intencionalidade por parte do educador.', resposta: 'V' },
+  { pergunta: 'A organização por competências implica que conteúdos isolados são suficientes para o desenvolvimento integral.', resposta: 'F' },
+  { pergunta: 'A prática interdisciplinar exige articulação entre áreas do conhecimento e projetos com intencionalidade pedagógica.', resposta: 'V' },
+  { pergunta: 'A concepção de currículo como construção social considera apenas os conteúdos previstos nas legislações educacionais.', resposta: 'F' },
+  { pergunta: 'A educação integral propõe o desenvolvimento das dimensões intelectual, física, emocional, cultural e social do estudante.', resposta: 'V' },
+  { pergunta: 'A relação pedagógica é neutra e não influencia os processos de ensino-aprendizagem.', resposta: 'F' },
+  { pergunta: 'As competências socioemocionais são irrelevantes para a formação de sujeitos críticos e empáticos.', resposta: 'F' },
+  { pergunta: 'A educação como prática de liberdade pressupõe diálogo, criticidade e transformação da realidade.', resposta: 'V' },
+  { pergunta: 'A cultura escolar é constituída apenas pelos conteúdos ensinados em sala de aula.', resposta: 'F' },
+  { pergunta: 'A personalização da aprendizagem pode contribuir para equidade educacional quando orientada por princípios éticos.', resposta: 'V' },
+  { pergunta: 'A avaliação deve ser um processo pontual, descontextualizado e sem feedback ao estudante.', resposta: 'F' },
+  { pergunta: 'As tecnologias educacionais devem ser utilizadas como ferramentas complementares ao trabalho pedagógico intencional.', resposta: 'V' },
+  { pergunta: 'A escuta ativa e sensível do estudante contribui para a criação de vínculos e para a personalização da trajetória escolar.', resposta: 'V' },
+  { pergunta: 'A aprendizagem por descoberta, conforme Bruner, estimula o raciocínio lógico e a autonomia intelectual.', resposta: 'V' },
+  { pergunta: 'A avaliação diagnóstica não contribui para a tomada de decisões pedagógicas no início do processo educativo.', resposta: 'F' },
+  { pergunta: 'A formação crítica dos educadores envolve leitura de mundo, compreensão das desigualdades e compromisso ético-político.', resposta: 'V' },
+  { pergunta: 'A BNCC ignora as competências socioemocionais e valoriza exclusivamente o desempenho cognitivo.', resposta: 'F' },
+  { pergunta: 'A escuta dos estudantes, mesmo quando desafiadora, contribui para a construção de uma escola mais democrática e inclusiva.', resposta: 'V' },
+  { pergunta: 'O ambiente de aprendizagem deve estimular a cooperação, a criatividade e a autonomia dos sujeitos.', resposta: 'V' },
+  { pergunta: 'O protagonismo infantil é uma diretriz ultrapassada e incompatível com os objetivos da Educação Infantil.', resposta: 'F' },
+  { pergunta: 'A flexibilização curricular pode contribuir para o reconhecimento das diversidades e singularidades dos estudantes.', resposta: 'V' }
+
+
+];
+
+
+   let perguntas = [];
+    let indice = 0;
+    let erros = 0;
+    let acertos = 0;
+    let tempoRestante = 13;
+    let cronometroInterval;
+
+    function embaralhar(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function iniciarJogo() {
+      perguntas = embaralhar([...perguntasOriginais]).slice(0, 5);
+      indice = 0;
+      erros = 0;
+      acertos = 0;
+      document.getElementById('resultado').innerText = '';
+      document.getElementById('recomecar').style.display = 'none';
+      document.getElementById('asteriscos').innerHTML = '';
+      document.getElementById('asteriscos').style.display = 'none';
+      document.getElementById('botaoComecar').style.display = 'none';
+      document.getElementById('pergunta').style.display = 'block';
+      document.getElementById('botaoV').style.display = 'inline-block';
+      document.getElementById('botaoF').style.display = 'inline-block';
+      mostrarPergunta();
+    }
+
+    function mostrarPergunta() {
+      if (cronometroInterval) clearInterval(cronometroInterval);
+
+      if (indice < perguntas.length) {
+        document.getElementById('pergunta').innerText = perguntas[indice].pergunta;
+        tempoRestante = 13;
+        document.getElementById('cronometro').innerText = `⏱ Tempo restante: ${tempoRestante}s`;
+
+        cronometroInterval = setInterval(() => {
+          tempoRestante--;
+          document.getElementById('cronometro').innerText = `⏱ Tempo restante: ${tempoRestante}s`;
+
+          if (tempoRestante === 0) {
+            clearInterval(cronometroInterval);
+            erros++;
+            indice++;
+            mostrarPergunta();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('pergunta').style.display = 'none';
+        document.getElementById('botaoV').style.display = 'none';
+        document.getElementById('botaoF').style.display = 'none';
+        document.getElementById('cronometro').innerText = '';
+
+        if (erros === 0) {
+          document.getElementById('resultado').innerText = "🎉 Parabéns! Você acertou todas!";
+          chuvaDeAsteriscos();
+        } else {
+          document.getElementById('resultado').innerText = "Que pena! Você errou " + erros + " pergunta(s).";
+        }
+        document.getElementById('recomecar').style.display = 'inline-block';
+      }
+    }
+
+    function responder(resposta) {
+      if (indice >= perguntas.length) return;
+
+      clearInterval(cronometroInterval);
+
+      if (resposta === perguntas[indice].resposta) {
+        acertos++;
+      } else {
+        erros++;
+      }
+
+      indice++;
+      mostrarPergunta();
+    }
+
+    function chuvaDeAsteriscos() {
+      const container = document.getElementById('asteriscos');
+      container.style.display = 'block';
+      for (let i = 0; i < 100; i++) {
+        const estrela = document.createElement('div');
+        estrela.classList.add('asterisco');
+        estrela.innerText = '*';
+        estrela.style.left = Math.random() * 100 + 'vw';
+        estrela.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        estrela.style.fontSize = (Math.random() * 30 + 20) + 'px';
+        container.appendChild(estrela);
+      }
+    }
+  </script>
+</body>
+</html>
